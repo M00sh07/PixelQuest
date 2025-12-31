@@ -93,7 +93,7 @@ const Index = () => {
 
   // ============ NEW HOOKS ============
   const { achievements, checkAchievements } = useAchievements();
-  const { challenges, updateProgress, completedCount: dailyChallengesCompleted } = useDailyChallenges();
+  const { challenges, updateProgress, getDailyChallengeReward, completedCount: dailyChallengesCompleted } = useDailyChallenges();
   const enhancedTasks = useEnhancedTasks();
   const habits = useHabits();
   const companion = useCompanion();
@@ -104,6 +104,41 @@ const Index = () => {
   const analytics = useAnalytics();
   const undo = useUndo();
   const accessibility = useAccessibility();
+
+  // Track which challenges have already rewarded XP
+  const [claimedChallengeXP, setClaimedChallengeXP] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem("pixel-claimed-challenge-xp");
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+  
+  useEffect(() => {
+    localStorage.setItem("pixel-claimed-challenge-xp", JSON.stringify([...claimedChallengeXP]));
+  }, [claimedChallengeXP]);
+  
+  // Check for newly completed daily challenges and award XP
+  useEffect(() => {
+    const completedChallenges = challenges.filter(c => c.completed && !claimedChallengeXP.has(c.id));
+    
+    if (completedChallenges.length > 0) {
+      let totalChallengeXP = 0;
+      const newClaimedIds = new Set(claimedChallengeXP);
+      
+      completedChallenges.forEach(challenge => {
+        totalChallengeXP += challenge.xpReward;
+        newClaimedIds.add(challenge.id);
+        
+        toast.success(`Daily Challenge Complete: ${challenge.title}!`, {
+          description: `+${challenge.xpReward} XP earned!`,
+          icon: <Zap className="w-4 h-4" />,
+        });
+      });
+      
+      setTotalXP(prev => prev + totalChallengeXP);
+      setTodayXPEarned(prev => prev + totalChallengeXP);
+      coins.earnCoins(Math.floor(totalChallengeXP * 0.3), "challenge", "Daily challenge bonus");
+      setClaimedChallengeXP(newClaimedIds);
+    }
+  }, [challenges, claimedChallengeXP, coins]);
 
   // ============ PERSISTENCE ============
   useEffect(() => {
@@ -376,11 +411,8 @@ const Index = () => {
             </div>
           </div>
 
-          
-
           <div className="flex items-center gap-3 flex-wrap">
             <CoinDisplay coins={coins.coins} />
-
             
             <PixelButton variant="ghost" size="sm" onClick={() => setShowShop(true)}>
               <Store className="w-4 h-4 text-quest-gold" />
@@ -398,11 +430,10 @@ const Index = () => {
             <PixelButton variant="ghost" size="sm" onClick={() => setShowAnalytics(true)}>
               <BarChart3 className="w-4 h-4 text-quest-mana" />
             </PixelButton>
-
-            <PixelButton variant="ghost" size="sm" onClick={() => setShowHelp(true)}>
-              <HelpCircle className="w-4 h-4 text-quest-white" />
-            </PixelButton>
             
+            <PixelButton variant="ghost" size="sm" onClick={() => setShowHelp(true)}>
+              <HelpCircle className="w-4 h-4 text-muted-foreground" />
+            </PixelButton>
           </div>
         </header>
 
@@ -621,4 +652,3 @@ const Index = () => {
 };
 
 export default Index;
-  

@@ -18,6 +18,7 @@ import { ProjectPanel } from "@/components/ProjectPanel";
 import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { SmartSuggestions } from "@/components/SmartSuggestions";
 import { UndoToast } from "@/components/UndoToast";
+import { HelpPanel } from "@/components/HelpPanel";
 import { useAchievements } from "@/hooks/useAchievements";
 import { useDailyChallenges } from "@/hooks/useDailyChallenges";
 import { useEnhancedTasks } from "@/hooks/useEnhancedTasks";
@@ -33,7 +34,7 @@ import { useAccessibility } from "@/hooks/useAccessibility";
 import { toast } from "sonner";
 import { 
   Sword, Shield, Scroll, Trophy, Award, Target, 
-  Store, TreeDeciduous, BarChart3, Zap, FolderKanban
+  Store, TreeDeciduous, BarChart3, Zap, FolderKanban, HelpCircle
 } from "lucide-react";
 import { 
   Quest, 
@@ -87,6 +88,7 @@ const Index = () => {
   const [showShop, setShowShop] = useState(false);
   const [showSkillTree, setShowSkillTree] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [activeTab, setActiveTab] = useState("quests");
 
   // ============ NEW HOOKS ============
@@ -374,8 +376,11 @@ const Index = () => {
             </div>
           </div>
 
+          
+
           <div className="flex items-center gap-3 flex-wrap">
             <CoinDisplay coins={coins.coins} />
+
             
             <PixelButton variant="ghost" size="sm" onClick={() => setShowShop(true)}>
               <Store className="w-4 h-4 text-quest-gold" />
@@ -393,6 +398,11 @@ const Index = () => {
             <PixelButton variant="ghost" size="sm" onClick={() => setShowAnalytics(true)}>
               <BarChart3 className="w-4 h-4 text-quest-mana" />
             </PixelButton>
+
+            <PixelButton variant="ghost" size="sm" onClick={() => setShowHelp(true)}>
+              <HelpCircle className="w-4 h-4 text-quest-white" />
+            </PixelButton>
+            
           </div>
         </header>
 
@@ -569,6 +579,7 @@ const Index = () => {
             }
             return result;
           }}
+          onClose={() => setShowShop(false)}
         />
       )}
 
@@ -579,6 +590,7 @@ const Index = () => {
           onUnlock={skillTree.unlockNode}
           canUnlock={(nodeId) => skillTree.skills.skillPoints > 0}
           getNodesByCategory={skillTree.getNodesByCategory}
+          onClose={() => setShowSkillTree(false)}
         />
       )}
 
@@ -590,7 +602,12 @@ const Index = () => {
           productivityTrend={analytics.getProductivityTrend(7)}
           energyBalance={analytics.getEnergyBalance()}
           onGenerateReport={analytics.generateWeeklyReport}
+          onClose={() => setShowAnalytics(false)}
         />
+      )}
+
+      {showHelp && (
+        <HelpPanel onClose={() => setShowHelp(false)} />
       )}
 
       {/* Undo Toast */}
@@ -604,3 +621,4 @@ const Index = () => {
 };
 
 export default Index;
+  

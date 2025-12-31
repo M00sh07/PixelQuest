@@ -10,7 +10,7 @@ const pixelButtonVariants = cva(
         default:
           "bg-primary text-primary-foreground pixel-border hover:brightness-110 active:brightness-90",
         quest:
-          "bg-quest-gold text-dungeon-dark pixel-border-gold hover:brightness-110 quest-shimmer",
+          "bg-quest-gold text-dungeon-light pixel-border-gold hover:brightness-110 quest-shimmer",
         danger:
           "bg-destructive text-destructive-foreground pixel-border hover:brightness-110",
         ghost:
